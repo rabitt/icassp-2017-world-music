@@ -58,7 +58,7 @@ def load_filelist(input_dir):
     filelist = []
     for file in os.listdir(input_dir):
         if file.endswith(".csv"):
-            filelist.append(file)
+            filelist.append(os.path.join(input_dir, file))
 
     return filelist
 
@@ -105,7 +105,7 @@ def extract_features_for_filelist(filelist=None):
             except:
                 continue
             contour_features_list.append(features[:,None].T)
-            contour_files_list.append(filelist[i])
+            contour_files_list.append(os.path.basename(filelist[i]))
     
     return contour_features_list, contour_files_list
 
