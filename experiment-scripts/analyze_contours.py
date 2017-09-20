@@ -128,7 +128,7 @@ def silhouette_K(X, min_ncl=5, max_ncl=20, metric='euclidean'):
     return best_K, average_silhouette
 
 
-def create_clusters(data):
+def create_clusters(data, K=None):
     '''Find the optimal K number of clusters using silhouette score and predict 
     cluster assignment for each sample in the data.
     
@@ -136,14 +136,17 @@ def create_clusters(data):
     ----------
     data : np.array
         The dataset of learned features (n_samples, n_features).
+    K : int
+        The number K of clusters.
     
     Returns
     -------
     cluster_pred : np.array
         Cluster assignment for each sample in the data.
     '''
-    best_K, _ = silhouette_K(data, min_ncl=5, max_ncl=20)
-    model = KMeans(n_clusters=best_K, random_state=50).fit(data)
+    if K is None:
+        K, _ = silhouette_K(data, min_ncl=5, max_ncl=20)
+    model = KMeans(n_clusters=K, random_state=50).fit(data)
     cluster_pred = model.predict(data)
     return cluster_pred
 
@@ -181,13 +184,13 @@ def main(pickle_file, meta_file, html_file=None):
         Path to html file to store the interactive TSNE visualization.
     '''
     # load precomputed contour features
-    contour_features, contour_files = pickle.load(open(pickle_file, 'rb'))
+    contour_features, contour_files = pickle.load(open(pickle_file, 'rb'))    
     df = align_metadata(contour_files, meta_file)
     
     embed_matrix = dictionary_learning(contour_features)
     hist_activations = histogram_activations(embed_matrix, contour_files)
     
-    cluster_pred = create_clusters(hist_activations)
+    cluster_pred = create_clusters(hist_activations, K=9)
     
     xy_coords = fit_TSNE(hist_activations)
     if html_file is not None:
